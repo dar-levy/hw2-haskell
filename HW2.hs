@@ -48,6 +48,9 @@ take n xs =
     (x : xs) -> x : take (n - 1) xs
 
 takeWhile :: (a -> Bool) -> [a] -> [a]
+takeWhile _ [] = []
+takeWhile p (x : xs) = if p x then x : (takeWhile p xs) else []
+
 drop :: Int -> [a] -> [a]
 dropWhile :: (a -> Bool) -> [a] -> [a]
 reverse :: [a] -> [a]
