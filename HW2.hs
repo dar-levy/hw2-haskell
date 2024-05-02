@@ -52,6 +52,11 @@ takeWhile _ [] = []
 takeWhile p (x : xs) = if p x then x : (takeWhile p xs) else []
 
 drop :: Int -> [a] -> [a]
+drop n [] = []
+drop n (x:xs)
+  | n > 0 = drop (n - 1) xs
+  | otherwise = x:xs
+
 dropWhile :: (a -> Bool) -> [a] -> [a]
 reverse :: [a] -> [a]
 rotate :: Int -> [a] -> [a]
