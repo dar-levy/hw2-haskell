@@ -8,7 +8,9 @@ module HW2 where
 import Data.List (find, foldl')
 import Prelude (Bool (..), Bounded (..), Char, Either (..), Enum (..), Eq (..), Int, Integer, Maybe (..), Num (..), Ord (..), Show (..), String, all, and, any, concat, concatMap, const, curry, div, elem, error, even, filter, flip, foldl, foldr, fst, id, length, lines, lookup, map, mod, not, notElem, null, odd, otherwise, product, snd, sum, uncurry, undefined, unlines, unwords, words, (!!), ($), (&&), (++), (.), (||))
 
-
+----------------------------------------:--------
+-- DO NOT MODIFY ANYTHING ABOVE THIS LINE !!! --
+------------------------------------------------
 
 -- Section 1.1: Basic Maybes
 concatMaybeMap :: (a -> Maybe b) -> Maybe a -> Maybe b
