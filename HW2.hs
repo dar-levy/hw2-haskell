@@ -90,6 +90,11 @@ fromGenerator (action, condition, start)
   | otherwise = []
 
 replicate :: Int -> a -> [a]
+replicate n x
+  | n <= 0    = []
+  | otherwise = x : myReplicate (n - 1) x
+
+
 inits :: [a] -> [[a]]
 tails :: [a] -> [[a]]
 
