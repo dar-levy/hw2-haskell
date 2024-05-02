@@ -41,17 +41,71 @@ eitherToMaybe = undefined
 
 -- Section 2: Lists
 take :: Int -> [a] -> [a]
+take n xs =
+  if n <= 0 then []
+  else case xs of
+    [] -> []
+    (x : xs) -> x : take (n - 1) xs
+
 takeWhile :: (a -> Bool) -> [a] -> [a]
+takeWhile _ [] = []
+takeWhile p (x : xs) = if p x then x : (takeWhile p xs) else []
+
 drop :: Int -> [a] -> [a]
+drop _ [] = []
+drop n (x:xs)
+  | n > 0 = drop (n - 1) xs
+  | otherwise = x:xs
+
 dropWhile :: (a -> Bool) -> [a] -> [a]
+dropWhile _ [] = []
+dropWhile p (x:xs)
+  | p x = dropWhile p xs
+  | otherwise = x:xs
+
 reverse :: [a] -> [a]
+reverse [] = []
+reverse [a] = [a]
+reverse (x:xs) = reverse xs ++ [x]
+
 rotate :: Int -> [a] -> [a]
+rotate n xs
+  | n <= 0    = xs
+  | null xs   = []
+  | otherwise = let len = length xs
+                    rotationCount = n `mod` len
+                in drop (len - rotationCount) xs ++ take (len - rotationCount) xs
+
 lotate :: Int -> [a] -> [a]
+lotate n xs
+  | n <= 0    = xs
+  | null xs   = []
+  | otherwise = let rotationCount = n `mod` length xs
+                in drop rotationCount xs ++ take rotationCount xs
+
 type Generator a = (a -> a, a -> Bool, a)
 fromGenerator :: Generator a -> [a]
+fromGenerator (action, condition, start)
+  | condition start = (action start) : fromGenerator (action, condition, (action start))
+  | otherwise = []
+
 replicate :: Int -> a -> [a]
+replicate n x
+  | n <= 0    = []
+  | otherwise = x : replicate (n - 1) x
+
 inits :: [a] -> [[a]]
+inits [] = [[]]
+inits xs = go 0
+        where
+          len = length xs
+          go n
+            | n > len = []
+            | otherwise = take n xs : go (n + 1)
+
 tails :: [a] -> [[a]]
+tails [] = [[]]
+tails xs = xs : tails (drop 1 xs)
 
 -- Section 3: zips and products
 zipWith :: (a -> b -> c) -> [a] -> [b] -> [c]
