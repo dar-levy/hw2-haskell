@@ -69,7 +69,20 @@ reverse [a] = [a]
 reverse (x:xs) = reverse xs ++ [x]
 
 rotate :: Int -> [a] -> [a]
+rotate n xs
+  | n <= 0    = xs
+  | null xs   = []
+  | otherwise = let len = length xs
+                    rotationCount = n `mod` len
+                in drop (len - rotationCount) xs ++ take (len - rotationCount) xs  -- Perform the right rotation
+
 lotate :: Int -> [a] -> [a]
+lotate n xs
+  | n <= 0    = xs
+  | null xs   = []
+  | otherwise = let rotationCount = n `mod` length xs  -- Calculate effective rotation that accounts for list length
+                in drop rotationCount xs ++ take rotationCount xs  -- Perform the rotation
+
 type Generator a = (a -> a, a -> Bool, a)
 fromGenerator :: Generator a -> [a]
 replicate :: Int -> a -> [a]
