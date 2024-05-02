@@ -104,6 +104,8 @@ inits xs = go 0
             | otherwise = take n xs : go (n + 1)
 
 tails :: [a] -> [[a]]
+tails [] = [[]]
+tails xs = xs : tails (drop 1 xs)
 
 -- Section 3: zips and products
 zipWith :: (a -> b -> c) -> [a] -> [b] -> [c]
