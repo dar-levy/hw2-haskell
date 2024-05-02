@@ -85,6 +85,10 @@ lotate n xs
 
 type Generator a = (a -> a, a -> Bool, a)
 fromGenerator :: Generator a -> [a]
+fromGenerator (action, condition, start)
+  | condition start = (action start) : fromGenerator (action, condition, (action start))
+  | otherwise = []
+
 replicate :: Int -> a -> [a]
 inits :: [a] -> [[a]]
 tails :: [a] -> [[a]]
