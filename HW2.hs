@@ -41,6 +41,12 @@ eitherToMaybe = undefined
 
 -- Section 2: Lists
 take :: Int -> [a] -> [a]
+take n xs =
+  if n <= 0 then []
+  else case xs of
+    [] -> []
+    (x : xs) -> x : take (n - 1) xs
+
 takeWhile :: (a -> Bool) -> [a] -> [a]
 drop :: Int -> [a] -> [a]
 dropWhile :: (a -> Bool) -> [a] -> [a]
