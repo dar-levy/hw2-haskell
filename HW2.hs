@@ -8,9 +8,7 @@ module HW2 where
 import Data.List (find, foldl')
 import Prelude (Bool (..), Bounded (..), Char, Either (..), Enum (..), Eq (..), Int, Integer, Maybe (..), Num (..), Ord (..), Show (..), String, all, and, any, concat, concatMap, const, curry, div, elem, error, even, filter, flip, foldl, foldr, fst, id, length, lines, lookup, map, mod, not, notElem, null, odd, otherwise, product, snd, sum, uncurry, undefined, unlines, unwords, words, (!!), ($), (&&), (++), (.), (||))
 
-----------------------------------------:--------
--- DO NOT MODIFY ANYTHING ABOVE THIS LINE !!! --
-------------------------------------------------
+
 
 -- Section 1.1: Basic Maybes
 concatMaybeMap :: (a -> Maybe b) -> Maybe a -> Maybe b
@@ -41,11 +39,11 @@ eitherToMaybe = undefined
 
 -- Section 2: Lists
 take :: Int -> [a] -> [a]
-take n xs =
-  if n <= 0 then []
-  else case xs of
-    [] -> []
-    (x : xs) -> x : take (n - 1) xs
+take n _
+  | n <= 0    = []
+take _ []     = []
+take n (x:xs) = x : take (n - 1) xs
+
 
 takeWhile :: (a -> Bool) -> [a] -> [a]
 takeWhile _ [] = []
@@ -109,11 +107,20 @@ tails xs = xs : tails (drop 1 xs)
 
 -- Section 3: zips and products
 zipWith :: (a -> b -> c) -> [a] -> [b] -> [c]
+zipWith = undefined
+
 zip :: [a] -> [b] -> [(a, b)]
+zip = undefined
+
 zipFill :: a -> b -> [a] -> [b] -> [(a, b)]
+zipFill = undefined
+
 data ZipFail = ErrorFirst | ErrorSecond deriving (Eq, Show)
 zipFail :: [a] -> [b] -> Either ZipFail [(a, b)]
+zipFail = undefined
+
 unzip :: [(a, b)] -> ([a], [b])
+unzip = undefined
 
 -- Section 4: Knight travels
 -- Position (0, 0) is the top-left corner.
@@ -122,11 +129,50 @@ data KnightMove = TopLeft | TopRight | RightTop | RightBottom | BottomRight | Bo
 -- Utility to get all knight moves. Don't worry about the implementation of this.
 allKnightMoves :: [KnightMove]
 allKnightMoves = [minBound .. maxBound]
+
+moveOffset :: KnightMove -> (Int, Int)
+moveOffset TopLeft     = (-1, -2)
+moveOffset TopRight    = (1, -2)
+moveOffset RightTop    = (2, -1)
+moveOffset RightBottom = (2, 1)
+moveOffset BottomRight = (1, 2)
+moveOffset BottomLeft  = (-1, 2)
+moveOffset LeftBottom  = (-2, 1)
+moveOffset LeftTop     = (-2, -1)
+
 data Board = Board {width :: Int, height :: Int} deriving (Show, Eq)
+
+validPos :: Board -> KnightPos -> Bool
+validPos (Board w h) (KnightPos x y) = x >= 0 && x < w && y >= 0 && y < h
+
+applyMove :: KnightPos -> KnightMove -> KnightPos
+applyMove (KnightPos x y) move = let (dx, dy) = moveOffset move in KnightPos (x + dx) (y + dy)
+
 tour :: Board -> KnightPos -> Maybe [KnightMove]
+tour = undefined
+
 newtype InvalidPosition = InvalidPosition KnightPos deriving (Show, Eq)
 translate :: KnightPos -> [KnightMove] -> [KnightPos]
+translate start [] = [start]  -- Start position with no moves results in the start itself
+translate start (m:ms) =
+  let next = applyMove start m  -- Calculate next position based on the first move
+  in start : translate next ms  -- Recursively build the list including the start and next positions
+
 translate' :: [KnightPos] -> Either InvalidPosition [KnightMove]
+translate' [] = Right []
+translate' [_] = Right []
+translate' (p1:p2:ps) = case findMove p1 p2 of
+    Just move -> case translate' (p2 : ps) of
+        Right moves -> Right (move : moves)
+        Left err    -> Left err
+    Nothing   -> Left (InvalidPosition p2)
+
+findMove :: KnightPos -> KnightPos -> Maybe KnightMove
+findMove (KnightPos x1 y1) (KnightPos x2 y2) =
+  find (\move -> let (dx, dy) = moveOffset move
+                     in (x1 + dx == x2) && (y1 + dy == y2))
+       allKnightMoves
 
 -- Bonus (10 points)
 mark :: Board -> [KnightPos] -> Either InvalidPosition [[Int]]
+mark = undefined
