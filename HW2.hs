@@ -95,7 +95,13 @@ replicate n x
   | otherwise = x : replicate (n - 1) x
 
 inits :: [a] -> [[a]]
-
+inits [] = [[]]
+inits xs = go 0
+        where
+          len = length xs
+          go n
+            | n > len = []
+            | otherwise = take n xs : go (n + 1)
 
 tails :: [a] -> [[a]]
 
