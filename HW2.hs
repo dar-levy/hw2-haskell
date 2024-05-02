@@ -64,6 +64,10 @@ dropWhile p (x:xs)
   | otherwise = x:xs
 
 reverse :: [a] -> [a]
+reverse [] = []
+reverse [a] = [a]
+reverse (x:xs) = reverse xs ++ [x]
+
 rotate :: Int -> [a] -> [a]
 lotate :: Int -> [a] -> [a]
 type Generator a = (a -> a, a -> Bool, a)
