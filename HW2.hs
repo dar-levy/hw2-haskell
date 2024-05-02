@@ -52,12 +52,17 @@ takeWhile _ [] = []
 takeWhile p (x : xs) = if p x then x : (takeWhile p xs) else []
 
 drop :: Int -> [a] -> [a]
-drop n [] = []
+drop _ [] = []
 drop n (x:xs)
   | n > 0 = drop (n - 1) xs
   | otherwise = x:xs
 
 dropWhile :: (a -> Bool) -> [a] -> [a]
+dropWhile _ [] = []
+dropWhile p (x:xs)
+  | p x = dropWhile p xs
+  | otherwise = x:xs
+
 reverse :: [a] -> [a]
 rotate :: Int -> [a] -> [a]
 lotate :: Int -> [a] -> [a]
