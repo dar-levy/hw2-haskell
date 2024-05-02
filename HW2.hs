@@ -74,14 +74,14 @@ rotate n xs
   | null xs   = []
   | otherwise = let len = length xs
                     rotationCount = n `mod` len
-                in drop (len - rotationCount) xs ++ take (len - rotationCount) xs  -- Perform the right rotation
+                in drop (len - rotationCount) xs ++ take (len - rotationCount) xs
 
 lotate :: Int -> [a] -> [a]
 lotate n xs
   | n <= 0    = xs
   | null xs   = []
-  | otherwise = let rotationCount = n `mod` length xs  -- Calculate effective rotation that accounts for list length
-                in drop rotationCount xs ++ take rotationCount xs  -- Perform the rotation
+  | otherwise = let rotationCount = n `mod` length xs
+                in drop rotationCount xs ++ take rotationCount xs
 
 type Generator a = (a -> a, a -> Bool, a)
 fromGenerator :: Generator a -> [a]
