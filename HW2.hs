@@ -131,49 +131,11 @@ data KnightMove = TopLeft | TopRight | RightTop | RightBottom | BottomRight | Bo
 -- Utility to get all knight moves. Don't worry about the implementation of this.
 allKnightMoves :: [KnightMove]
 allKnightMoves = [minBound .. maxBound]
-
-moveOffset :: KnightMove -> (Int, Int)
-moveOffset TopLeft     = (-1, -2)
-moveOffset TopRight    = (1, -2)
-moveOffset RightTop    = (2, -1)
-moveOffset RightBottom = (2, 1)
-moveOffset BottomRight = (1, 2)
-moveOffset BottomLeft  = (-1, 2)
-moveOffset LeftBottom  = (-2, 1)
-moveOffset LeftTop     = (-2, -1)
-
 data Board = Board {width :: Int, height :: Int} deriving (Show, Eq)
-
-validPos :: Board -> KnightPos -> Bool
-validPos (Board w h) (KnightPos x y) = x >= 0 && x < w && y >= 0 && y < h
-
-applyMove :: KnightPos -> KnightMove -> KnightPos
-applyMove (KnightPos x y) move = let (dx, dy) = moveOffset move in KnightPos (x + dx) (y + dy)
-
 tour :: Board -> KnightPos -> Maybe [KnightMove]
-tour = undefined
-
 newtype InvalidPosition = InvalidPosition KnightPos deriving (Show, Eq)
 translate :: KnightPos -> [KnightMove] -> [KnightPos]
-translate start [] = [start]  -- Start position with no moves results in the start itself
-translate start (m:ms) =
-  let next = applyMove start m  -- Calculate next position based on the first move
-  in start : translate next ms  -- Recursively build the list including the start and next positions
-
 translate' :: [KnightPos] -> Either InvalidPosition [KnightMove]
-translate' [] = Right []
-translate' [_] = Right []
-translate' (p1:p2:ps) = case findMove p1 p2 of
-    Just move -> case translate' (p2 : ps) of
-        Right moves -> Right (move : moves)
-        Left err    -> Left err
-    Nothing   -> Left (InvalidPosition p2)
-
-findMove :: KnightPos -> KnightPos -> Maybe KnightMove
-findMove (KnightPos x1 y1) (KnightPos x2 y2) =
-  find (\move -> let (dx, dy) = moveOffset move
-                     in (x1 + dx == x2) && (y1 + dy == y2))
-       allKnightMoves
 
 -- Bonus (10 points)
 mark :: Board -> [KnightPos] -> Either InvalidPosition [[Int]]
