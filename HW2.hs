@@ -8,9 +8,6 @@ module HW2 where
 import Data.List (find, foldl')
 import Prelude (Bool (..), Bounded (..), Char, Either (..), Enum (..), Eq (..), Int, Integer, Maybe (..), Num (..), Ord (..), Show (..), String, all, and, any, concat, concatMap, const, curry, div, elem, error, even, filter, flip, foldl, foldr, fst, id, length, lines, lookup, map, mod, not, notElem, null, odd, otherwise, product, snd, sum, uncurry, undefined, unlines, unwords, words, (!!), ($), (&&), (++), (.), (||))
 
-----------------------------------------:--------
--- DO NOT MODIFY ANYTHING ABOVE THIS LINE !!! --
-------------------------------------------------
 
 -- Section 1.1: Basic Maybes
 concatMaybeMap :: (a -> Maybe b) -> Maybe a -> Maybe b
@@ -41,11 +38,11 @@ eitherToMaybe = undefined
 
 -- Section 2: Lists
 take :: Int -> [a] -> [a]
-take n xs =
-  if n <= 0 then []
-  else case xs of
-    [] -> []
-    (x : xs) -> x : take (n - 1) xs
+take n _
+  | n <= 0    = []
+take _ []     = []
+take n (x:xs) = x : take (n - 1) xs
+
 
 takeWhile :: (a -> Bool) -> [a] -> [a]
 takeWhile _ [] = []
@@ -109,11 +106,20 @@ tails xs = xs : tails (drop 1 xs)
 
 -- Section 3: zips and products
 zipWith :: (a -> b -> c) -> [a] -> [b] -> [c]
+zipWith = undefined
+
 zip :: [a] -> [b] -> [(a, b)]
+zip = undefined
+
 zipFill :: a -> b -> [a] -> [b] -> [(a, b)]
+zipFill = undefined
+
 data ZipFail = ErrorFirst | ErrorSecond deriving (Eq, Show)
 zipFail :: [a] -> [b] -> Either ZipFail [(a, b)]
+zipFail = undefined
+
 unzip :: [(a, b)] -> ([a], [b])
+unzip = undefined
 
 -- Section 4: Knight travels
 -- Position (0, 0) is the top-left corner.
@@ -123,10 +129,67 @@ data KnightMove = TopLeft | TopRight | RightTop | RightBottom | BottomRight | Bo
 allKnightMoves :: [KnightMove]
 allKnightMoves = [minBound .. maxBound]
 data Board = Board {width :: Int, height :: Int} deriving (Show, Eq)
-tour :: Board -> KnightPos -> Maybe [KnightMove]
 newtype InvalidPosition = InvalidPosition KnightPos deriving (Show, Eq)
+
+head :: [a] -> a
+head (x:_) = x
+head _     = error "empty list"
+
+tail :: [a] -> [a]
+tail []     = error "tail: empty list"
+tail (_:xs) = xs
+
 translate :: KnightPos -> [KnightMove] -> [KnightPos]
+translate (KnightPos x y) moves = tail $ reverse $ foldl' (\acc move -> translateMove move (head acc) : acc) [KnightPos x y] moves
+
+translateMove :: KnightMove -> KnightPos -> KnightPos
+translateMove TopLeft (KnightPos x y) = KnightPos (x - 2) (y - 1)
+translateMove TopRight (KnightPos x y) = KnightPos (x + 2) (y - 1)
+translateMove RightTop (KnightPos x y) = KnightPos (x + 1) (y - 2)
+translateMove RightBottom (KnightPos x y) = KnightPos (x + 1) (y + 2)
+translateMove BottomRight (KnightPos x y) = KnightPos (x + 2) (y + 1)
+translateMove BottomLeft (KnightPos x y) = KnightPos (x - 2) (y + 1)
+translateMove LeftBottom (KnightPos x y) = KnightPos (x - 1) (y + 2)
+translateMove LeftTop (KnightPos x y) = KnightPos (x - 1) (y - 2)
+
 translate' :: [KnightPos] -> Either InvalidPosition [KnightMove]
+translate' [] = Right []
+translate' [_] = Right []
+translate' (pos1:pos2:rest) =
+    case find (\move -> translateMove move pos1 == pos2) allKnightMoves of
+        Just move -> case translate' (pos2:rest) of
+                        Right moves -> Right (move:moves)
+                        Left err -> Left err
+        Nothing -> Left (InvalidPosition pos2)
+
+-- Main function to find a Knight's tour
+tour :: Board -> KnightPos -> Maybe [KnightMove]
+tour (Board w h) start
+    | w == 1 && h == 1 = Just []  -- Special case for 1x1 board
+    | otherwise = go [start] []
+  where
+    totalPositions = w * h
+
+    go :: [KnightPos] -> [KnightMove] -> Maybe [KnightMove]
+    go visited moves
+      | length visited == totalPositions = Just (reverse moves)
+      | otherwise = foldl' (\acc move -> acc `mplus` tryMove move) Nothing allKnightMoves
+      where
+        currentPos = head visited
+
+        tryMove :: KnightMove -> Maybe [KnightMove]
+        tryMove move =
+          let newPos = translateMove move currentPos
+          in if isValidMove newPos then go (newPos : visited) (move : moves) else Nothing
+
+        isValidMove :: KnightPos -> Bool
+        isValidMove (KnightPos x y) = x >= 0 && x < w && y >= 0 && y < h && notElem (KnightPos x y) visited
+
+mplus :: Maybe a -> Maybe a -> Maybe a
+mplus Nothing y = y
+mplus x _ = x
+
 
 -- Bonus (10 points)
 mark :: Board -> [KnightPos] -> Either InvalidPosition [[Int]]
+mark = undefined
