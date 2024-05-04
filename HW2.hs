@@ -130,30 +130,6 @@ allKnightMoves :: [KnightMove]
 allKnightMoves = [minBound .. maxBound]
 data Board = Board {width :: Int, height :: Int} deriving (Show, Eq)
 newtype InvalidPosition = InvalidPosition KnightPos deriving (Show, Eq)
----- Utility function to check if a move is valid from a given position
---isValidMove :: Board -> KnightPos -> KnightMove -> Bool
---isValidMove (Board w h) (KnightPos x y) move =
---    let newX = x + dx
---        newY = y + dy
---        dx = case move of
---            RightTop -> 1
---            RightBottom -> 1
---            BottomRight -> 2
---            BottomLeft -> 2
---            LeftBottom -> -1
---            LeftTop -> -1
---            TopLeft -> -2
---            TopRight -> -2
---        dy = case move of
---            RightTop -> -2
---            RightBottom -> 2
---            BottomRight -> 1
---            BottomLeft -> 1
---            LeftBottom -> 2
---            LeftTop -> -2
---            TopLeft -> -1
---            TopRight -> -1
---    in newX >= 0 && newX < w && newY >= 0 && newY < h
 
 head :: [a] -> a
 head (x:_) = x
@@ -186,31 +162,34 @@ translate' (pos1:pos2:rest) =
                         Left err -> Left err
         Nothing -> Left (InvalidPosition pos2)
 
+-- Main function to find a Knight's tour
+tour :: Board -> KnightPos -> Maybe [KnightMove]
+tour (Board w h) start
+    | w == 1 && h == 1 = Just []  -- Special case for 1x1 board
+    | otherwise = go [start] []
+  where
+    totalPositions = w * h
 
----- Function to check if a given tour is valid on the board
---isValidTour :: Board -> [KnightMove] -> Bool
---isValidTour board moves = all (uncurry (isValidMove board)) $ zip startPos (tail posList)
---    where
---        startPos = KnightPos 0 0 : map (\pos -> last $ translate pos moves) posList
---        posList = scanl (\(KnightPos x y) move ->
---            case move of
---                RightTop -> KnightPos (x + 1) (y - 2)
---                RightBottom -> KnightPos (x + 1) (y + 2)
---                BottomRight -> KnightPos (x + 2) (y + 1)
---                BottomLeft -> KnightPos (x - 2) (y + 1)
---                LeftBottom -> KnightPos (x - 1) (y + 2)
---                LeftTop -> KnightPos (x - 1) (y - 2)
---                TopLeft -> KnightPos (x - 2) (y - 1)
---                TopRight -> KnightPos (x + 2) (y - 1)
---            ) (KnightPos 0 0) moves
---
----- Function to find a valid tour on the board
---tour :: Board -> KnightPos -> Maybe [KnightMove]
---tour board startPos = case find (isValidTour board) possibleTours of
---    Just moves -> Just moves
---    Nothing -> Nothing
---    where
---        possibleTours = filter (\moves -> head (translate startPos moves) == KnightPos 0 0) $ permutations allKnightMoves
+    go :: [KnightPos] -> [KnightMove] -> Maybe [KnightMove]
+    go visited moves
+      | length visited == totalPositions = Just moves  -- Complete tour
+      | otherwise = foldl' (\acc move -> acc `mplus` tryMove move) Nothing allKnightMoves
+      where
+        currentPos = head visited
+
+        tryMove :: KnightMove -> Maybe [KnightMove]
+        tryMove move =
+          let newPos = translateMove move currentPos
+          in if isValidMove newPos then go (newPos : visited) (move : moves) else Nothing
+
+        isValidMove :: KnightPos -> Bool
+        isValidMove (KnightPos x y) = x >= 0 && x < w && y >= 0 && y < h && notElem (KnightPos x y) visited
+
+mplus :: Maybe a -> Maybe a -> Maybe a
+mplus Nothing y = y
+mplus x _ = x
+
+
 
 -- Bonus (10 points)
 mark :: Board -> [KnightPos] -> Either InvalidPosition [[Int]]
