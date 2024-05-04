@@ -159,8 +159,12 @@ head :: [a] -> a
 head (x:_) = x
 head _     = error "empty list"
 
+tail :: [a] -> [a]
+tail []     = error "tail: empty list"
+tail (_:xs) = xs
+
 translate :: KnightPos -> [KnightMove] -> [KnightPos]
-translate (KnightPos x y) moves = reverse $ foldl' (\acc move -> translateMove move (head acc) : acc) [KnightPos x y] moves
+translate (KnightPos x y) moves = tail $ reverse $ foldl' (\acc move -> translateMove move (head acc) : acc) [KnightPos x y] moves
 
 translateMove :: KnightMove -> KnightPos -> KnightPos
 translateMove TopLeft (KnightPos x y) = KnightPos (x - 2) (y - 1)
