@@ -176,7 +176,6 @@ translateMove BottomLeft (KnightPos x y) = KnightPos (x - 2) (y + 1)
 translateMove LeftBottom (KnightPos x y) = KnightPos (x - 1) (y + 2)
 translateMove LeftTop (KnightPos x y) = KnightPos (x - 1) (y - 2)
 
--- Function to translate a list of positions into a list of moves
 translate' :: [KnightPos] -> Either InvalidPosition [KnightMove]
 translate' [] = Right []
 translate' [_] = Right []
