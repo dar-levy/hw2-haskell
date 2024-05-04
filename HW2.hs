@@ -176,16 +176,18 @@ translateMove BottomLeft (KnightPos x y) = KnightPos (x - 2) (y + 1)
 translateMove LeftBottom (KnightPos x y) = KnightPos (x - 1) (y + 2)
 translateMove LeftTop (KnightPos x y) = KnightPos (x - 1) (y - 2)
 
----- Function to translate a list of positions into a list of moves
---translate' :: [KnightPos] -> Either InvalidPosition [KnightMove]
---translate' [pos] = Right []
---translate' (p1:p2:ps) =
---    case find (\move -> isValidMove (Board 9999 9999) p1 move && p2 `elem` translate p1 [move]) allKnightMoves of
---        Just move -> case translate' (p2:ps) of
---            Right moves -> Right (move:moves)
---            Left err -> Left err
---        Nothing -> Left (InvalidPosition p2)
---
+-- Function to translate a list of positions into a list of moves
+translate' :: [KnightPos] -> Either InvalidPosition [KnightMove]
+translate' [] = Right []
+translate' [_] = Right []
+translate' (pos1:pos2:rest) =
+    case find (\move -> translateMove move pos1 == pos2) allKnightMoves of
+        Just move -> case translate' (pos2:rest) of
+                        Right moves -> Right (move:moves)
+                        Left err -> Left err
+        Nothing -> Left (InvalidPosition pos2)
+
+
 ---- Function to check if a given tour is valid on the board
 --isValidTour :: Board -> [KnightMove] -> Bool
 --isValidTour board moves = all (uncurry (isValidMove board)) $ zip startPos (tail posList)
