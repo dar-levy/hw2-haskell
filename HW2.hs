@@ -172,7 +172,7 @@ tour (Board w h) start
 
     go :: [KnightPos] -> [KnightMove] -> Maybe [KnightMove]
     go visited moves
-      | length visited == totalPositions = Just moves  -- Complete tour
+      | length visited == totalPositions = Just (reverse moves)
       | otherwise = foldl' (\acc move -> acc `mplus` tryMove move) Nothing allKnightMoves
       where
         currentPos = head visited
@@ -188,7 +188,6 @@ tour (Board w h) start
 mplus :: Maybe a -> Maybe a -> Maybe a
 mplus Nothing y = y
 mplus x _ = x
-
 
 
 -- Bonus (10 points)
