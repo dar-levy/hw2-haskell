@@ -8,21 +8,38 @@ module HW2 where
 import Data.List (find, foldl')
 import Prelude (Bool (..), Bounded (..), Char, Either (..), Enum (..), Eq (..), Int, Integer, Maybe (..), Num (..), Ord (..), Show (..), String, all, and, any, concat, concatMap, const, curry, div, elem, error, even, filter, flip, foldl, foldr, fst, id, length, lines, lookup, map, mod, not, notElem, null, odd, otherwise, product, snd, sum, uncurry, undefined, unlines, unwords, words, (!!), ($), (&&), (++), (.), (||))
 
-----------------------------------------:--------
+------------------------------------------------
 -- DO NOT MODIFY ANYTHING ABOVE THIS LINE !!! --
 ------------------------------------------------
 
 -- Section 1.1: Basic Maybes
 concatMaybeMap :: (a -> Maybe b) -> Maybe a -> Maybe b
-concatMaybeMap = undefined
+concatMaybeMap _ Nothing = Nothing
+concatMaybeMap f (Just a) = f a
+
+
 fromMaybe :: a -> Maybe a -> a
-fromMaybe = undefined
+fromMaybe x Nothing = x
+fromMaybe _ (Just a) = a
+
+
 maybe :: b -> (a -> b) -> Maybe a -> b
-maybe = undefined
+maybe b _ Nothing = b
+maybe _ f (Just a) = f a
+
 catMaybes :: [Maybe a] -> [a]
-catMaybes = undefined
+catMaybes [] = []
+catMaybes [Nothing : xs] = catMaybes xs
+catMaybes [Just x : xs] = x : catMaybes xs
+
 mapMaybe :: (a -> Maybe b) -> [a] -> [b]
-mapMaybe = undefined
+mapMaybe _ [] = []
+--mapMaybe f [Nothing : xs] = mapMaybe f xs
+mapMaybe f [x : xs] = case (f x) of
+  Nothing -> mapMaybe f xs
+  Just y -> y : mapMaybe f xs
+
+
 -- Section 1.2 Basic Eithers
 concatEitherMap :: (a -> Either e b) -> Either e a -> Either e b
 concatEitherMap = undefined
