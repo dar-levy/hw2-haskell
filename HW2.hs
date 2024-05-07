@@ -29,32 +29,62 @@ maybe _ f (Just a) = f a
 
 catMaybes :: [Maybe a] -> [a]
 catMaybes [] = []
-catMaybes [Nothing : xs] = catMaybes xs
-catMaybes [Just x : xs] = x : catMaybes xs
+catMaybes (Nothing : xs) = catMaybes xs
+catMaybes (Just x : xs) = x : catMaybes xs
 
 mapMaybe :: (a -> Maybe b) -> [a] -> [b]
 mapMaybe _ [] = []
---mapMaybe f [Nothing : xs] = mapMaybe f xs
-mapMaybe f [x : xs] = case (f x) of
+mapMaybe f (x : xs) = case (f x) of
   Nothing -> mapMaybe f xs
   Just y -> y : mapMaybe f xs
 
 
 -- Section 1.2 Basic Eithers
 concatEitherMap :: (a -> Either e b) -> Either e a -> Either e b
-concatEitherMap = undefined
+concatEitherMap _ (Left e) = Left e
+concatEitherMap f (Right a) = f a
+
 either :: (a -> c) -> (b -> c) -> Either a b -> c
-either = undefined
+either f _ (Left a) = f a
+either _ g (Right b) = g b
+
 mapLeft :: (a -> c) -> Either a b -> Either c b
-mapLeft = undefined
+mapLeft f (Left a) = Left (f a)
+mapLeft _ (Right b) = Right b 
+
+
 catEithers :: [Either e a] -> Either e [a]
-catEithers = undefined
+catEithers (Left e : _) = Left e
+catEithers [] = Right []
+catEithers (Right x : xs) = case catEithers xs of
+  Left e -> Left e
+  Right seq -> Right (x : seq)
+
+
 mapEither :: (a -> Either e b) -> [a] -> Either e [b]
-mapEither = undefined
+mapEither _ [] = Right []
+mapEither f (x : xs) = case f x of
+  Left e -> Left e
+  Right y -> case mapEither f xs of
+    Left e -> Left e
+    Right seq -> Right (y : seq)
+
+
 partitionEithers :: [Either a b] -> ([a], [b])
-partitionEithers = undefined
+partitionEithers seq = (leftList seq, rightList seq) where
+  leftList :: [Either a b] -> [a]
+  leftList [] = []
+  leftList (Left a : xs) = a : (leftList xs)
+  leftList (Right _ : xs) = leftList xs
+  rightList :: [Either a b] -> [b]
+  rightList [] = []
+  rightList (Right b : xs) = b : (rightList xs)
+  rightList (Left _ : xs) = rightList xs
+
+
 eitherToMaybe :: Either a b -> Maybe b
-eitherToMaybe = undefined
+eitherToMaybe (Left _) = Nothing
+eitherToMaybe (Right b) = Just b
 
 -- Section 2: Lists
 take :: Int -> [a] -> [a]
@@ -124,26 +154,26 @@ tails :: [a] -> [[a]]
 tails [] = [[]]
 tails xs = xs : tails (drop 1 xs)
 
--- Section 3: zips and products
-zipWith :: (a -> b -> c) -> [a] -> [b] -> [c]
-zip :: [a] -> [b] -> [(a, b)]
-zipFill :: a -> b -> [a] -> [b] -> [(a, b)]
-data ZipFail = ErrorFirst | ErrorSecond deriving (Eq, Show)
-zipFail :: [a] -> [b] -> Either ZipFail [(a, b)]
-unzip :: [(a, b)] -> ([a], [b])
+-- -- Section 3: zips and products
+-- zipWith :: (a -> b -> c) -> [a] -> [b] -> [c]
+-- zip :: [a] -> [b] -> [(a, b)]
+-- zipFill :: a -> b -> [a] -> [b] -> [(a, b)]
+-- data ZipFail = ErrorFirst | ErrorSecond deriving (Eq, Show)
+-- zipFail :: [a] -> [b] -> Either ZipFail [(a, b)]
+-- unzip :: [(a, b)] -> ([a], [b])
 
--- Section 4: Knight travels
--- Position (0, 0) is the top-left corner.
-data KnightPos = KnightPos {x :: Int, y :: Int} deriving (Show, Eq)
-data KnightMove = TopLeft | TopRight | RightTop | RightBottom | BottomRight | BottomLeft | LeftBottom | LeftTop deriving (Enum, Bounded, Show, Eq)
--- Utility to get all knight moves. Don't worry about the implementation of this.
-allKnightMoves :: [KnightMove]
-allKnightMoves = [minBound .. maxBound]
-data Board = Board {width :: Int, height :: Int} deriving (Show, Eq)
-tour :: Board -> KnightPos -> Maybe [KnightMove]
-newtype InvalidPosition = InvalidPosition KnightPos deriving (Show, Eq)
-translate :: KnightPos -> [KnightMove] -> [KnightPos]
-translate' :: [KnightPos] -> Either InvalidPosition [KnightMove]
+-- -- Section 4: Knight travels
+-- -- Position (0, 0) is the top-left corner.
+-- data KnightPos = KnightPos {x :: Int, y :: Int} deriving (Show, Eq)
+-- data KnightMove = TopLeft | TopRight | RightTop | RightBottom | BottomRight | BottomLeft | LeftBottom | LeftTop deriving (Enum, Bounded, Show, Eq)
+-- -- Utility to get all knight moves. Don't worry about the implementation of this.
+-- allKnightMoves :: [KnightMove]
+-- allKnightMoves = [minBound .. maxBound]
+-- data Board = Board {width :: Int, height :: Int} deriving (Show, Eq)
+-- tour :: Board -> KnightPos -> Maybe [KnightMove]
+-- newtype InvalidPosition = InvalidPosition KnightPos deriving (Show, Eq)
+-- translate :: KnightPos -> [KnightMove] -> [KnightPos]
+-- translate' :: [KnightPos] -> Either InvalidPosition [KnightMove]
 
--- Bonus (10 points)
-mark :: Board -> [KnightPos] -> Either InvalidPosition [[Int]]
+-- -- Bonus (10 points)
+-- mark :: Board -> [KnightPos] -> Either InvalidPosition [[Int]]
