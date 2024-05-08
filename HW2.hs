@@ -106,20 +106,42 @@ tails xs = xs : tails (drop 1 xs)
 
 -- Section 3: zips and products
 zipWith :: (a -> b -> c) -> [a] -> [b] -> [c]
-zipWith = undefined
+zipWith _ [] _ = []
+zipWith _ _ [] = []
+zipWith f (a : as) (b : bs) = (f a b) : zipWith f as bs
 
 zip :: [a] -> [b] -> [(a, b)]
-zip = undefined
+--zip _ [] = []
+--zip [] _ = []
+--zip (a : as) (b : bs) = (a, b) : zip as bs
+zip = zipWith (\x y -> (x, y))
 
 zipFill :: a -> b -> [a] -> [b] -> [(a, b)]
-zipFill = undefined
+zipFill _ _ [] [] = []
+zipFill def_a def_b (a : as) [] = (a, def_b) : zipFill def_a def_b as []
+zipFill def_a def_b [] (b : bs) = (def_a, b) : zipFill def_a def_b [] bs
+zipFill def_a def_b (a: as) (b : bs) = (a, b) : zipFill def_a def_b as bs
 
 data ZipFail = ErrorFirst | ErrorSecond deriving (Eq, Show)
 zipFail :: [a] -> [b] -> Either ZipFail [(a, b)]
-zipFail = undefined
+zipFail [] [] = Right []
+zipFail [] (_ : _) = Left ErrorFirst
+zipFail (_ : _) [] = Left ErrorSecond
+zipFail (a : as) (b : bs) = case zipFail as bs of
+  Left err -> Left err
+  Right seq -> Right ((a, b) : seq)
 
 unzip :: [(a, b)] -> ([a], [b])
-unzip = undefined
+-- unzip xs = (leftList xs, rightList xs) where
+--   leftList :: [(a, b)] -> [a]
+--   leftList [] = []
+--   leftList ((a, _) : as) = a : leftList as
+--   rightList :: [(a, b)] -> [b]
+--   rightList [] = []
+--   rightList ((_, b) : bs) = b : rightList bs
+unzip [] = ([], [])
+unzip ((a, b) : seq) = (a : as, b : bs) where
+  (as, bs) = unzip seq
 
 -- Section 4: Knight travels
 -- Position (0, 0) is the top-left corner.
