@@ -260,5 +260,31 @@ mplus x _ = x
 
 
 -- Bonus (10 points)
+
+-- Returns a list of pairs of indexes from a list of KnightPos
+-- Notice that the order og x and y is flipped because in KnightPos y is the rows and x is the columns
+knightPosListToTuple :: [KnightPos] -> [(Int, Int)]
+knightPosListToTuple [] = []
+knightPosListToTuple ((KnightPos x y) : kps) = (y, x) : knightPosListToTuple kps
+
+markAux :: Int -> Int -> [(Int, Int)] -> Either InvalidPosition [[Int]]
+markAux height width indexes = if (x, y) /= (-1, -1) then Left (InvalidPosition (KnightPos x y))
+  else Right (map (\i -> map (\j -> lookupValue (i, j)) [0..width-1]) [0..height-1])
+  where
+    getFirstInvalidPosition :: Int -> Int -> [(Int, Int)] -> (Int, Int)
+    getFirstInvalidPosition _ _ [] = (-1, -1)
+    getFirstInvalidPosition h w ((col, row) : kps) = if col >= h || row >= w then (col, row) else getFirstInvalidPosition h w kps
+    (x, y) = getFirstInvalidPosition height width indexes
+    lookupValue (i, j) = maybe (-1) fst (lookup (i, j) indexedList)
+    indexedList :: [((Int, Int), (Int, Int))]
+    indexedList = zip indexes (zip [0..] [0..])
+
 mark :: Board -> [KnightPos] -> Either InvalidPosition [[Int]]
-mark = undefined
+mark (Board h w) kps = if (i, j) /= (-1, -1) then Left (InvalidPosition (KnightPos i j))
+  else markAux h w indexes
+  where
+    indexes = knightPosListToTuple kps
+    findFirstDuplicate :: [(Int, Int)] -> Maybe (Int, Int)
+    findFirstDuplicate [] = Nothing
+    findFirstDuplicate (x : xs) = if any (\y-> x == y) xs then Just x else findFirstDuplicate xs
+    (i, j) = fromMaybe (-1, -1) (findFirstDuplicate indexes)
