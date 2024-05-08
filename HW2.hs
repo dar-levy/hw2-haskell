@@ -11,30 +11,77 @@ import Prelude (Bool (..), Bounded (..), Char, Either (..), Enum (..), Eq (..), 
 
 -- Section 1.1: Basic Maybes
 concatMaybeMap :: (a -> Maybe b) -> Maybe a -> Maybe b
-concatMaybeMap = undefined
+concatMaybeMap _ Nothing = Nothing
+concatMaybeMap f (Just a) = f a
+
+
 fromMaybe :: a -> Maybe a -> a
-fromMaybe = undefined
+fromMaybe x Nothing = x
+fromMaybe _ (Just a) = a
+
+
 maybe :: b -> (a -> b) -> Maybe a -> b
-maybe = undefined
+maybe b _ Nothing = b
+maybe _ f (Just a) = f a
+
 catMaybes :: [Maybe a] -> [a]
-catMaybes = undefined
+catMaybes [] = []
+catMaybes (Nothing : xs) = catMaybes xs
+catMaybes (Just x : xs) = x : catMaybes xs
+
 mapMaybe :: (a -> Maybe b) -> [a] -> [b]
-mapMaybe = undefined
+mapMaybe _ [] = []
+mapMaybe f (x : xs) = case (f x) of
+  Nothing -> mapMaybe f xs
+  Just y -> y : mapMaybe f xs
+
+
 -- Section 1.2 Basic Eithers
 concatEitherMap :: (a -> Either e b) -> Either e a -> Either e b
-concatEitherMap = undefined
+concatEitherMap _ (Left e) = Left e
+concatEitherMap f (Right a) = f a
+
 either :: (a -> c) -> (b -> c) -> Either a b -> c
-either = undefined
+either f _ (Left a) = f a
+either _ g (Right b) = g b
+
 mapLeft :: (a -> c) -> Either a b -> Either c b
-mapLeft = undefined
+mapLeft f (Left a) = Left (f a)
+mapLeft _ (Right b) = Right b 
+
+
 catEithers :: [Either e a] -> Either e [a]
-catEithers = undefined
+catEithers (Left e : _) = Left e
+catEithers [] = Right []
+catEithers (Right x : xs) = case catEithers xs of
+  Left e -> Left e
+  Right seq -> Right (x : seq)
+
+
 mapEither :: (a -> Either e b) -> [a] -> Either e [b]
-mapEither = undefined
+mapEither _ [] = Right []
+mapEither f (x : xs) = case f x of
+  Left e -> Left e
+  Right y -> case mapEither f xs of
+    Left e -> Left e
+    Right seq -> Right (y : seq)
+
+
 partitionEithers :: [Either a b] -> ([a], [b])
-partitionEithers = undefined
+partitionEithers seq = (leftList seq, rightList seq) where
+  leftList :: [Either a b] -> [a]
+  leftList [] = []
+  leftList (Left a : xs) = a : (leftList xs)
+  leftList (Right _ : xs) = leftList xs
+  rightList :: [Either a b] -> [b]
+  rightList [] = []
+  rightList (Right b : xs) = b : (rightList xs)
+  rightList (Left _ : xs) = rightList xs
+
+
 eitherToMaybe :: Either a b -> Maybe b
-eitherToMaybe = undefined
+eitherToMaybe (Left _) = Nothing
+eitherToMaybe (Right b) = Just b
 
 -- Section 2: Lists
 take :: Int -> [a] -> [a]
