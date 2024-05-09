@@ -179,13 +179,6 @@ zipFail (a : as) (b : bs) = case zipFail as bs of
   Right seq -> Right ((a, b) : seq)
 
 unzip :: [(a, b)] -> ([a], [b])
--- unzip xs = (leftList xs, rightList xs) where
---   leftList :: [(a, b)] -> [a]
---   leftList [] = []
---   leftList ((a, _) : as) = a : leftList as
---   rightList :: [(a, b)] -> [b]
---   rightList [] = []
---   rightList ((_, b) : bs) = b : rightList bs
 unzip [] = ([], [])
 unzip ((a, b) : seq) = (a : as, b : bs) where
   (as, bs) = unzip seq
