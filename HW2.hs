@@ -268,23 +268,34 @@ knightPosListToTuple [] = []
 knightPosListToTuple ((KnightPos x y) : kps) = (y, x) : knightPosListToTuple kps
 
 markAux :: Int -> Int -> [(Int, Int)] -> Either InvalidPosition [[Int]]
-markAux height width indexes = if (x, y) /= (-1, -1) then Left (InvalidPosition (KnightPos x y))
+markAux height width pos_indexes = if (x, y) /= (-1, -1) then Left (InvalidPosition (KnightPos x y))
   else Right (map (\i -> map (\j -> lookupValue (i, j)) [0..width-1]) [0..height-1])
   where
+
+    -- Auxiliary function for finding if a certain position in the list is out of the board's boundries.
     getFirstInvalidPosition :: Int -> Int -> [(Int, Int)] -> (Int, Int)
     getFirstInvalidPosition _ _ [] = (-1, -1)
     getFirstInvalidPosition h w ((col, row) : kps) = if col >= h || row >= w then (col, row) else getFirstInvalidPosition h w kps
-    (x, y) = getFirstInvalidPosition height width indexes
-    lookupValue (i, j) = maybe (-1) fst (lookup (i, j) indexedList)
-    indexedList :: [((Int, Int), (Int, Int))]
-    indexedList = zip indexes (zip [0..] [0..])
+    (x, y) = getFirstInvalidPosition height width pos_indexes
+
+    -- Auxiliary function for mapping a value (a postion on the board) to its (first) index in the list.
+    -- Retuns the index if the value is found on the list, otherwise, returns Nothing.
+    getFirstIndexOf :: (Int, Int) -> [(Int, Int)] -> Int -> Maybe Int
+    getFirstIndexOf _ [] _ = Nothing
+    getFirstIndexOf val (tup : xs) idx = if tup == val then Just idx else getFirstIndexOf val xs (idx+1)
+    
+    -- Looks for theindex of the value (i, j) in the indexes list, if found, returns the index, otherwise, -1.
+    lookupValue :: (Int, Int) -> Int
+    lookupValue (i, j) = fromMaybe (-1) (getFirstIndexOf (i, j) pos_indexes 0)
 
 mark :: Board -> [KnightPos] -> Either InvalidPosition [[Int]]
 mark (Board h w) kps = if (i, j) /= (-1, -1) then Left (InvalidPosition (KnightPos i j))
   else markAux h w indexes
   where
     indexes = knightPosListToTuple kps
+
+    -- Auxiliary function for finding if a position is visited more than once at a tour
     findFirstDuplicate :: [(Int, Int)] -> Maybe (Int, Int)
     findFirstDuplicate [] = Nothing
-    findFirstDuplicate (x : xs) = if any (\y-> x == y) xs then Just x else findFirstDuplicate xs
+    findFirstDuplicate (x : xs) = if elem x xs then Just x else findFirstDuplicate xs
     (i, j) = fromMaybe (-1, -1) (findFirstDuplicate indexes)
