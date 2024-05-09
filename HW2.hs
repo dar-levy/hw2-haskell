@@ -11,30 +11,77 @@ import Prelude (Bool (..), Bounded (..), Char, Either (..), Enum (..), Eq (..), 
 
 -- Section 1.1: Basic Maybes
 concatMaybeMap :: (a -> Maybe b) -> Maybe a -> Maybe b
-concatMaybeMap = undefined
+concatMaybeMap _ Nothing = Nothing
+concatMaybeMap f (Just a) = f a
+
+
 fromMaybe :: a -> Maybe a -> a
-fromMaybe = undefined
+fromMaybe x Nothing = x
+fromMaybe _ (Just a) = a
+
+
 maybe :: b -> (a -> b) -> Maybe a -> b
-maybe = undefined
+maybe b _ Nothing = b
+maybe _ f (Just a) = f a
+
 catMaybes :: [Maybe a] -> [a]
-catMaybes = undefined
+catMaybes [] = []
+catMaybes (Nothing : xs) = catMaybes xs
+catMaybes (Just x : xs) = x : catMaybes xs
+
 mapMaybe :: (a -> Maybe b) -> [a] -> [b]
-mapMaybe = undefined
+mapMaybe _ [] = []
+mapMaybe f (x : xs) = case (f x) of
+  Nothing -> mapMaybe f xs
+  Just y -> y : mapMaybe f xs
+
+
 -- Section 1.2 Basic Eithers
 concatEitherMap :: (a -> Either e b) -> Either e a -> Either e b
-concatEitherMap = undefined
+concatEitherMap _ (Left e) = Left e
+concatEitherMap f (Right a) = f a
+
 either :: (a -> c) -> (b -> c) -> Either a b -> c
-either = undefined
+either f _ (Left a) = f a
+either _ g (Right b) = g b
+
 mapLeft :: (a -> c) -> Either a b -> Either c b
-mapLeft = undefined
+mapLeft f (Left a) = Left (f a)
+mapLeft _ (Right b) = Right b 
+
+
 catEithers :: [Either e a] -> Either e [a]
-catEithers = undefined
+catEithers (Left e : _) = Left e
+catEithers [] = Right []
+catEithers (Right x : xs) = case catEithers xs of
+  Left e -> Left e
+  Right seq -> Right (x : seq)
+
+
 mapEither :: (a -> Either e b) -> [a] -> Either e [b]
-mapEither = undefined
+mapEither _ [] = Right []
+mapEither f (x : xs) = case f x of
+  Left e -> Left e
+  Right y -> case mapEither f xs of
+    Left e -> Left e
+    Right seq -> Right (y : seq)
+
+
 partitionEithers :: [Either a b] -> ([a], [b])
-partitionEithers = undefined
+partitionEithers seq = (leftList seq, rightList seq) where
+  leftList :: [Either a b] -> [a]
+  leftList [] = []
+  leftList (Left a : xs) = a : (leftList xs)
+  leftList (Right _ : xs) = leftList xs
+  rightList :: [Either a b] -> [b]
+  rightList [] = []
+  rightList (Right b : xs) = b : (rightList xs)
+  rightList (Left _ : xs) = rightList xs
+
+
 eitherToMaybe :: Either a b -> Maybe b
-eitherToMaybe = undefined
+eitherToMaybe (Left _) = Nothing
+eitherToMaybe (Right b) = Just b
 
 -- Section 2: Lists
 take :: Int -> [a] -> [a]
@@ -106,20 +153,42 @@ tails xs = xs : tails (drop 1 xs)
 
 -- Section 3: zips and products
 zipWith :: (a -> b -> c) -> [a] -> [b] -> [c]
-zipWith = undefined
+zipWith _ [] _ = []
+zipWith _ _ [] = []
+zipWith f (a : as) (b : bs) = (f a b) : zipWith f as bs
 
 zip :: [a] -> [b] -> [(a, b)]
-zip = undefined
+--zip _ [] = []
+--zip [] _ = []
+--zip (a : as) (b : bs) = (a, b) : zip as bs
+zip = zipWith (\x y -> (x, y))
 
 zipFill :: a -> b -> [a] -> [b] -> [(a, b)]
-zipFill = undefined
+zipFill _ _ [] [] = []
+zipFill def_a def_b (a : as) [] = (a, def_b) : zipFill def_a def_b as []
+zipFill def_a def_b [] (b : bs) = (def_a, b) : zipFill def_a def_b [] bs
+zipFill def_a def_b (a: as) (b : bs) = (a, b) : zipFill def_a def_b as bs
 
 data ZipFail = ErrorFirst | ErrorSecond deriving (Eq, Show)
 zipFail :: [a] -> [b] -> Either ZipFail [(a, b)]
-zipFail = undefined
+zipFail [] [] = Right []
+zipFail [] (_ : _) = Left ErrorFirst
+zipFail (_ : _) [] = Left ErrorSecond
+zipFail (a : as) (b : bs) = case zipFail as bs of
+  Left err -> Left err
+  Right seq -> Right ((a, b) : seq)
 
 unzip :: [(a, b)] -> ([a], [b])
-unzip = undefined
+-- unzip xs = (leftList xs, rightList xs) where
+--   leftList :: [(a, b)] -> [a]
+--   leftList [] = []
+--   leftList ((a, _) : as) = a : leftList as
+--   rightList :: [(a, b)] -> [b]
+--   rightList [] = []
+--   rightList ((_, b) : bs) = b : rightList bs
+unzip [] = ([], [])
+unzip ((a, b) : seq) = (a : as, b : bs) where
+  (as, bs) = unzip seq
 
 -- Section 4: Knight travels
 -- Position (0, 0) is the top-left corner.
@@ -191,5 +260,38 @@ mplus x _ = x
 
 
 -- Bonus (10 points)
+
+-- Returns a list of pairs of indexes from a list of KnightPos
+-- Notice that the order of x and y is flipped because in KnightPos y is the rows and x is the columns
+knightPosListToTuple :: [KnightPos] -> [(Int, Int)]
+knightPosListToTuple [] = []
+knightPosListToTuple ((KnightPos x y) : kps) = (y, x) : knightPosListToTuple kps
+
+markAux :: Int -> Int -> [(Int, Int)] -> Either InvalidPosition [[Int]]
+markAux height width pos_indexes = if (x, y) /= (-1, -1) then Left (InvalidPosition (KnightPos x y))
+  else Right (map (\i -> map (\j -> (getFirstIndexOf (i, j) pos_indexes 0)) [0..width-1]) [0..height-1])
+  where
+
+    -- Auxiliary function for finding if a certain position in the list is out of the board's boundries.
+    getFirstInvalidPosition :: Int -> Int -> [(Int, Int)] -> (Int, Int)
+    getFirstInvalidPosition _ _ [] = (-1, -1)
+    getFirstInvalidPosition h w ((col, row) : kps) = if col >= h || row >= w then (col, row) else getFirstInvalidPosition h w kps
+    (x, y) = getFirstInvalidPosition height width pos_indexes
+
+    -- Auxiliary function for mapping a value (a postion on the board) to its (first) index in the list.
+    -- Retuns the index if the value is found on the list, otherwise, returns -1.
+    getFirstIndexOf :: (Int, Int) -> [(Int, Int)] -> Int -> Int
+    getFirstIndexOf _ [] _ = (-1)
+    getFirstIndexOf val (tup : xs) idx = if tup == val then idx else getFirstIndexOf val xs (idx+1)
+
 mark :: Board -> [KnightPos] -> Either InvalidPosition [[Int]]
-mark = undefined
+mark (Board h w) kps = if (i, j) /= (-1, -1) then Left (InvalidPosition (KnightPos i j))
+  else markAux h w indexes
+  where
+    indexes = knightPosListToTuple kps
+
+    -- Auxiliary function for finding if a position is visited more than once at a tour
+    findFirstDuplicate :: [(Int, Int)] -> Maybe (Int, Int)
+    findFirstDuplicate [] = Nothing
+    findFirstDuplicate (x : xs) = if elem x xs then Just x else findFirstDuplicate xs
+    (i, j) = fromMaybe (-1, -1) (findFirstDuplicate indexes)
