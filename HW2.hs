@@ -262,14 +262,14 @@ mplus x _ = x
 -- Bonus (10 points)
 
 -- Returns a list of pairs of indexes from a list of KnightPos
--- Notice that the order og x and y is flipped because in KnightPos y is the rows and x is the columns
+-- Notice that the order of x and y is flipped because in KnightPos y is the rows and x is the columns
 knightPosListToTuple :: [KnightPos] -> [(Int, Int)]
 knightPosListToTuple [] = []
 knightPosListToTuple ((KnightPos x y) : kps) = (y, x) : knightPosListToTuple kps
 
 markAux :: Int -> Int -> [(Int, Int)] -> Either InvalidPosition [[Int]]
 markAux height width pos_indexes = if (x, y) /= (-1, -1) then Left (InvalidPosition (KnightPos x y))
-  else Right (map (\i -> map (\j -> lookupValue (i, j)) [0..width-1]) [0..height-1])
+  else Right (map (\i -> map (\j -> (getFirstIndexOf (i, j) pos_indexes 0)) [0..width-1]) [0..height-1])
   where
 
     -- Auxiliary function for finding if a certain position in the list is out of the board's boundries.
@@ -279,14 +279,10 @@ markAux height width pos_indexes = if (x, y) /= (-1, -1) then Left (InvalidPosit
     (x, y) = getFirstInvalidPosition height width pos_indexes
 
     -- Auxiliary function for mapping a value (a postion on the board) to its (first) index in the list.
-    -- Retuns the index if the value is found on the list, otherwise, returns Nothing.
-    getFirstIndexOf :: (Int, Int) -> [(Int, Int)] -> Int -> Maybe Int
-    getFirstIndexOf _ [] _ = Nothing
-    getFirstIndexOf val (tup : xs) idx = if tup == val then Just idx else getFirstIndexOf val xs (idx+1)
-    
-    -- Looks for theindex of the value (i, j) in the indexes list, if found, returns the index, otherwise, -1.
-    lookupValue :: (Int, Int) -> Int
-    lookupValue (i, j) = fromMaybe (-1) (getFirstIndexOf (i, j) pos_indexes 0)
+    -- Retuns the index if the value is found on the list, otherwise, returns -1.
+    getFirstIndexOf :: (Int, Int) -> [(Int, Int)] -> Int -> Int
+    getFirstIndexOf _ [] _ = (-1)
+    getFirstIndexOf val (tup : xs) idx = if tup == val then idx else getFirstIndexOf val xs (idx+1)
 
 mark :: Board -> [KnightPos] -> Either InvalidPosition [[Int]]
 mark (Board h w) kps = if (i, j) /= (-1, -1) then Left (InvalidPosition (KnightPos i j))
